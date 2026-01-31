@@ -66,4 +66,4 @@ A migration script is included. See `migrate_yourls.php` for instructions.
 
 ## License
 
-MIT License
+GPL v3
