@@ -2,6 +2,8 @@
 
 A minimal and elegant URL shortener built with PHP, MariaDB, HTML, CSS, and JavaScript.
 
+SN/P is totally vibe coded with Claude Code to make an example of what's possible. Please have that in mind before running SN/P in any (production) environment!
+
 ## Features
 
 - 🔗 **Fast URL shortening** — Shorten long URLs with one click
