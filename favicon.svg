@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .favicon-text {
+      font-family: "Gravesend Sans", "Arial Black", "Helvetica Neue", sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      fill: #31394E;
+    }
+  </style>
+  <text class="favicon-text" x="50%" y="75%" text-anchor="middle">/</text>
+</svg>
