@@ -23,7 +23,9 @@ define('ANONYMIZE_IP', true);
 define('TOKEN_EXPIRY_HOURS', 24);
 
 define('RESERVED_CODES', ['admin', 'api', 'stats', 'login', 'logout', 'install']);
-define('CORS_ORIGIN', '*');
+// Configure CORS origin - MUST be set to your actual domain in production
+// Example: 'https://yourdomain.com' or 'https://yourdomain.com,https://api.yourdomain.com'
+define('CORS_ORIGIN', 'https://yourdomain.com');
 function getDbConnection(): PDO { static $p=null; if($p===null){ $p=new PDO('mysql:host='.DB_HOST.';dbname='.DB_NAME.';charset='.DB_CHARSET,DB_USER,DB_PASS,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]); } return $p; }
 function jsonResponse(array $d,int $c=200):void{http_response_code($c);header('Content-Type:application/json');header('Access-Control-Allow-Origin:'.CORS_ORIGIN);echo json_encode($d);exit;}
 function errorResponse(string $m,int $c=400):void{jsonResponse(['success'=>false,'error'=>$m],$c);}

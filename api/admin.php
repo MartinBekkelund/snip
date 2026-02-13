@@ -14,8 +14,8 @@ require_once __DIR__ . '/config.php';
 // Admin-passord (endre dette!)
 define('ADMIN_PASSWORD_HASH', '');
 
-// Session for autentisering
-session_start();
+// Session for autentisering - use secure session configuration
+startSecureSession();
 
 // Handle preflight CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -31,18 +31,47 @@ header('Access-Control-Allow-Origin: ' . CORS_ORIGIN);
 header('Access-Control-Allow-Credentials: true');
 
 /**
+ * Generate and manage CSRF tokens
+ */
+function getCsrfToken(): string {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validateCsrfToken(): bool {
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    return !empty($token) && hash_equals($_SESSION['csrf_token'] ?? '', $token);
+}
+
+/**
+ * Require valid CSRF token for state-changing operations
+ */
+function requireCsrfToken(): void {
+    $method = $_SERVER['REQUEST_METHOD'];
+    if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+        if (!validateCsrfToken()) {
+            jsonResponse(['success' => false, 'error' => 'Invalid request'], 403);
+        }
+    }
+}
+
+/**
  * Sjekk autentisering
  */
 function isAuthenticated(): bool {
     // Sjekk session
     if (isset($_SESSION['admin_authenticated']) && $_SESSION['admin_authenticated'] === true) {
-        return true;
-    }
-
-    // Sjekk header token
-    $token = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
-    if ($token === hash('sha256', ADMIN_PASSWORD . date('Y-m-d'))) {
-        return true;
+        // Validate token expiry
+        if (isset($_SESSION['admin_token_expires']) && $_SESSION['admin_token_expires'] > time()) {
+            return true;
+        }
+        // Token expired
+        $_SESSION['admin_authenticated'] = false;
+        unset($_SESSION['admin_token']);
+        unset($_SESSION['admin_token_expires']);
+        return false;
     }
 
     return false;
@@ -61,19 +90,31 @@ function requireAuth(): void {
 $requestUri = $_SERVER['REQUEST_URI'];
 if (strpos($requestUri, '/auth') !== false || (isset($_GET['action']) && $_GET['action'] === 'auth')) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Check rate limit before processing
+        $clientIp = getClientIp();
+        if (!checkRateLimit('login_' . $clientIp, RATE_LIMIT_LOGIN_MAX, RATE_LIMIT_LOGIN_WINDOW)) {
+            jsonResponse(['success' => false, 'error' => 'Feil passord'], 401);
+        }
+
         $input = json_decode(file_get_contents('php://input'), true);
         $password = $input['password'] ?? '';
 
-        if (password_verify($password, ADMIN_PASSWORD_HASH)) {
+        // Verify password hash (must be configured, empty string will fail)
+        if (!empty(ADMIN_PASSWORD_HASH) && password_verify($password, ADMIN_PASSWORD_HASH)) {
+            // Store authentication in session with expiry
             $_SESSION['admin_authenticated'] = true;
-            $token = hash('sha256', ADMIN_PASSWORD . date('Y-m-d'));
+            $_SESSION['admin_token_expires'] = time() + (TOKEN_EXPIRY_HOURS * 3600);
+
+            // Generate and return CSRF token
+            $csrfToken = getCsrfToken();
+
             jsonResponse([
                 'success' => true,
                 'message' => 'Innlogget',
-                'token' => $token
+                'csrf_token' => $csrfToken
             ]);
         } else {
-            jsonResponse(['success' => false, 'error' => 'Feil passord'], 401);
+            jsonResponse(['success' => false, 'error' => 'Invalid credentials'], 401);
         }
     }
     exit;
@@ -81,6 +122,7 @@ if (strpos($requestUri, '/auth') !== false || (isset($_GET['action']) && $_GET['
 
 // Sjekk utlogging
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    requireCsrfToken();
     $_SESSION['admin_authenticated'] = false;
     session_destroy();
     jsonResponse(['success' => true, 'message' => 'Logget ut']);
@@ -88,11 +130,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 
 // Sjekk auth-status
 if (isset($_GET['action']) && $_GET['action'] === 'check') {
-    jsonResponse(['success' => true, 'authenticated' => isAuthenticated()]);
+    $authenticated = isAuthenticated();
+    $response = ['success' => true, 'authenticated' => $authenticated];
+    if ($authenticated) {
+        $response['csrf_token'] = getCsrfToken();
+    }
+    jsonResponse($response);
 }
 
 // Krev autentisering for alle andre operasjoner
 requireAuth();
+
+// Krev CSRF token for state-changing operations
+requireCsrfToken();
 
 $db = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];

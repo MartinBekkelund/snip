@@ -3,6 +3,10 @@
 
 RewriteEngine On
 
+# Enforce HTTPS in production (uncomment when HTTPS is available)
+# RewriteCond %{HTTPS} !on
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # Set base path (change if installed in a subdirectory)
 # RewriteBase /snip/
 
@@ -27,13 +31,21 @@ RewriteRule ^([a-zA-Z0-9_-]+)/?$ redirect.php?code=$1 [L,QSA]
     Deny from all
 </FilesMatch>
 
-# CORS headers for API
+# CORS headers for API - MUST configure origin in api/config.php
 <IfModule mod_headers.c>
     <FilesMatch "\.php$">
-        Header set Access-Control-Allow-Origin "*"
-        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
         Header set Access-Control-Allow-Headers "Content-Type"
+        Header set Access-Control-Allow-Credentials "true"
     </FilesMatch>
+
+    # Security headers
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:"
 </IfModule>
 
 # Compression

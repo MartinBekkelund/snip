@@ -844,7 +844,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         const API_BASE = './api';
-        let authToken = localStorage.getItem('adminToken') || '';
+        let csrfToken = '';
         let currentPage = 1;
         let currentSort = 'created_at';
         let currentOrder = 'DESC';
@@ -860,11 +860,15 @@
         async function checkAuth() {
             try {
                 const r = await fetch(`${API_BASE}/admin.php?action=check`, {
-                    credentials: 'include',
-                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                    credentials: 'include'
                 });
                 const d = await r.json();
-                d.authenticated ? showApp() : showLogin();
+                if (d.authenticated) {
+                    csrfToken = d.csrf_token || '';
+                    showApp();
+                } else {
+                    showLogin();
+                }
             } catch (e) {
                 showLogin();
             }
@@ -949,11 +953,10 @@
                 });
                 const d = await r.json();
                 if (d.success) {
-                    authToken = d.token;
-                    localStorage.setItem('adminToken', authToken);
+                    csrfToken = d.csrf_token || '';
                     showApp();
                 } else {
-                    err.textContent = d.error || 'Wrong password';
+                    err.textContent = d.error || 'Invalid credentials';
                     err.classList.add('show');
                 }
             } catch (error) {
@@ -963,9 +966,15 @@
         }
 
         async function handleLogout() {
-            try { await fetch(`${API_BASE}/admin.php?action=logout`, { credentials: 'include' }); } catch (e) {}
-            authToken = '';
-            localStorage.removeItem('adminToken');
+            try {
+                await fetch(`${API_BASE}/admin.php?action=logout`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
+                    body: JSON.stringify({})
+                });
+            } catch (e) {}
+            csrfToken = '';
             showLogin();
         }
 
@@ -1031,7 +1040,7 @@
 
                 const r = await fetch(`${API_BASE}/admin.php?${params}`, {
                     credentials: 'include',
-                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
                 });
 
                 if (r.status === 401) { showLogin(); return; }
@@ -1125,7 +1134,7 @@
             try {
                 const r = await fetch(`${API_BASE}/admin.php`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', ...(authToken ? { 'X-Admin-Token': authToken } : {}) },
+                    headers: { 'Content-Type': 'application/json', ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}) },
                     credentials: 'include',
                     body: JSON.stringify(data)
                 });
@@ -1157,7 +1166,7 @@
                 const r = await fetch(`${API_BASE}/admin.php?id=${currentUrlId}`, {
                     method: 'DELETE',
                     credentials: 'include',
-                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                    headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {}
                 });
                 const res = await r.json();
                 if (res.success) {
