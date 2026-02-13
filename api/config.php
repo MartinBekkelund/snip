@@ -114,3 +114,62 @@ function startSecureSession(): void {
         ]);
     }
 }
+
+// ============================================
+// AUTO-UPDATE CONFIGURATION
+// ============================================
+
+// Enable/disable automatic updates
+define('AUTO_UPDATE_ENABLED', true);
+
+// Update check frequency: 'weekly' | 'monthly' | 'manual'
+define('AUTO_UPDATE_CHECK_FREQUENCY', 'weekly');
+
+// Day for weekly updates (Monday-Sunday)
+define('AUTO_UPDATE_DAY', 'Sunday');
+
+// Hour for update checks (0-23, UTC)
+define('AUTO_UPDATE_HOUR', 3);
+
+// Automatically install updates when available
+define('AUTO_UPDATE_AUTO_INSTALL', true);
+
+// ============================================
+// BACKUP CONFIGURATION
+// ============================================
+
+// Number of backups to keep (cleanup older ones)
+define('BACKUP_RETENTION_COUNT', 10);
+
+// Maximum age of backups in days (delete older)
+define('BACKUP_MAX_AGE_DAYS', 90);
+
+// Compress database dumps with gzip
+define('BACKUP_COMPRESS_DATABASE', true);
+
+// ============================================
+// GITHUB CONFIGURATION
+// ============================================
+
+// GitHub repository owner
+define('GITHUB_REPO_OWNER', 'MartinBekkelund');
+
+// GitHub repository name
+define('GITHUB_REPO_NAME', 'snip');
+
+// GitHub API timeout in seconds
+define('GITHUB_API_TIMEOUT', 10);
+
+// ============================================
+// UPDATE CONFIGURATION
+// ============================================
+
+// Maximum time for update process (seconds)
+define('UPDATE_TIMEOUT_MINUTES', 10);
+
+// Maintenance mode safety timeout (seconds)
+// If update takes longer, maintenance mode is auto-disabled
+define('MAINTENANCE_MODE_TIMEOUT', 600);
+
+// Email address to notify on update events (optional)
+define('UPDATE_ADMIN_EMAIL', '');

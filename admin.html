@@ -659,6 +659,10 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     Dashboard
                 </button>
+                <button class="nav-item" data-view="updates">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6m0 4v6"/><circle cx="12" cy="12" r="10"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+                    Updates
+                </button>
             </nav>
             <div class="sidebar-footer">
                 <button class="nav-item" id="logoutBtn">
@@ -750,6 +754,112 @@
                         <button class="btn btn-ghost btn-sm" id="prevBtn" disabled>Previous</button>
                         <button class="btn btn-ghost btn-sm" id="nextBtn" disabled>Next</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Updates Section (hidden by default) -->
+            <div id="updatesView" style="display: none;">
+                <!-- Update Status Card -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Current Version</div>
+                        <div class="stat-value" id="currentVersion">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Latest Version</div>
+                        <div class="stat-value" id="latestVersion">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Last Checked</div>
+                        <div class="stat-value" id="lastChecked" style="font-size: 1rem;">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" id="updateStatus" style="font-size: 1rem; color: var(--accent-secondary);">-</div>
+                    </div>
+                </div>
+
+                <!-- Update Control Card -->
+                <div class="table-card" style="margin-bottom: 2rem;">
+                    <div class="table-header">
+                        <div class="table-title">System Updates</div>
+                        <div style="display: flex; gap: 0.75rem;">
+                            <button class="btn btn-ghost btn-sm" id="checkUpdatesBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                Check Now
+                            </button>
+                            <button class="btn btn-primary btn-sm" id="performUpdateBtn" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 4 12 10 8 6"/><polyline points="12 20 12 14 16 18"/><path d="M4.5 8.5V4m3 15h4.5v4"/></svg>
+                                Update Now
+                            </button>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div id="updateMessage" style="color: var(--text-secondary); margin-bottom: 1rem;"></div>
+                        <div id="releaseNotes" style="background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); max-height: 300px; overflow-y: auto; margin-bottom: 1rem; display: none;">
+                            <div style="color: var(--text-muted); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem;">Release Notes</div>
+                            <div id="releaseNotesContent" style="font-size: 0.875rem; color: var(--text-secondary); white-space: pre-wrap;"></div>
+                        </div>
+                        <div id="updateProgressBar" style="display: none; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-size: 0.875rem;">Updating...</span>
+                                <span id="updateProgress" style="font-size: 0.875rem; color: var(--text-muted);">0%</span>
+                            </div>
+                            <div style="background: var(--bg-card); height: 4px; border-radius: 2px; overflow: hidden;">
+                                <div id="updateProgressFill" style="background: var(--accent-primary); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backups Card -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title">Backups</div>
+                        <button class="btn btn-ghost btn-sm" id="loadBackupsBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Date</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backupsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading backups...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Update History Card -->
+                <div class="table-card" style="margin-top: 2rem;">
+                    <div class="table-header">
+                        <div class="table-title">Update History</div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Duration</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Loading history...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -880,6 +990,11 @@
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
+            // Navigation
+            document.querySelectorAll('[data-view]').forEach(btn => {
+                btn.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view));
+            });
+
             // Shorten form
             document.getElementById('shortenForm').addEventListener('submit', handleShorten);
             document.getElementById('copyResultBtn').addEventListener('click', () => copyToClipboard(currentShortUrl));
@@ -964,6 +1079,13 @@
             document.querySelectorAll('.modal-overlay').forEach(o => {
                 o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('show'); });
             });
+
+            // Updates
+            if (document.getElementById('checkUpdatesBtn')) {
+                document.getElementById('checkUpdatesBtn').addEventListener('click', checkForUpdates);
+                document.getElementById('performUpdateBtn').addEventListener('click', performUpdate);
+                document.getElementById('loadBackupsBtn').addEventListener('click', loadBackups);
+            }
         }
 
         // Auth
@@ -1262,6 +1384,263 @@
             }
         }
 
+        // View Switching
+        function switchView(viewName) {
+            // Update navigation
+            document.querySelectorAll('[data-view]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+
+            // Show/hide views
+            const shortenCard = document.querySelector('.shorten-card');
+            const firstStatsGrid = document.querySelector('.stats-grid');
+            const header = document.querySelector('.header');
+            const tableCard = document.querySelector('.table-card');
+            const updatesView = document.getElementById('updatesView');
+
+            if (viewName === 'dashboard') {
+                shortenCard.style.display = 'block';
+                firstStatsGrid.style.display = 'grid';
+                header.style.display = 'flex';
+                tableCard.style.display = 'block';
+                updatesView.style.display = 'none';
+            } else if (viewName === 'updates') {
+                shortenCard.style.display = 'none';
+                firstStatsGrid.style.display = 'none';
+                header.style.display = 'none';
+                tableCard.style.display = 'none';
+                updatesView.style.display = 'block';
+                loadUpdateStatus();
+                loadBackups();
+                loadUpdateHistory();
+            }
+        }
+
+        // Updates Functions
+        async function checkForUpdates() {
+            const btn = document.getElementById('checkUpdatesBtn');
+            btn.disabled = true;
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=check-updates`, {
+                    credentials: 'include'
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    document.getElementById('currentVersion').textContent = d.current_version || '-';
+                    document.getElementById('latestVersion').textContent = d.latest_version || '-';
+                    document.getElementById('lastChecked').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                    if (d.update_available) {
+                        document.getElementById('updateStatus').textContent = 'Update Available';
+                        document.getElementById('updateStatus').style.color = 'var(--warning)';
+                        document.getElementById('updateMessage').textContent = `Version ${d.latest_version} is available.`;
+                        document.getElementById('performUpdateBtn').style.display = 'inline-flex';
+                        if (d.release_notes) {
+                            document.getElementById('releaseNotesContent').textContent = d.release_notes;
+                            document.getElementById('releaseNotes').style.display = 'block';
+                        }
+                    } else {
+                        document.getElementById('updateStatus').textContent = 'Up to Date';
+                        document.getElementById('updateStatus').style.color = 'var(--success)';
+                        document.getElementById('updateMessage').textContent = 'You are running the latest version.';
+                        document.getElementById('performUpdateBtn').style.display = 'none';
+                        document.getElementById('releaseNotes').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('updateMessage').textContent = 'Error: ' + (d.error || 'Could not check for updates');
+                }
+            } catch (e) {
+                document.getElementById('updateMessage').textContent = 'Error: Could not connect to server';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function performUpdate() {
+            if (!confirm('Are you sure you want to update now? This will enable maintenance mode for a few minutes.')) {
+                return;
+            }
+
+            const btn = document.getElementById('performUpdateBtn');
+            btn.disabled = true;
+            const version = document.getElementById('latestVersion').textContent;
+
+            document.getElementById('updateProgressBar').style.display = 'block';
+            document.getElementById('updateMessage').textContent = 'Updating to version ' + version + '...';
+
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+                    credentials: 'include',
+                    body: JSON.stringify({ version: version })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    document.getElementById('updateMessage').textContent = 'Update completed successfully! Refreshing...';
+                    document.getElementById('updateProgressFill').style.width = '100%';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    document.getElementById('updateMessage').textContent = 'Error: ' + (d.error || 'Update failed');
+                    document.getElementById('updateProgressBar').style.display = 'none';
+                }
+            } catch (e) {
+                document.getElementById('updateMessage').textContent = 'Error: ' + e.message;
+                document.getElementById('updateProgressBar').style.display = 'none';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function loadUpdateStatus() {
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=check-updates`, {
+                    credentials: 'include'
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    document.getElementById('currentVersion').textContent = d.current_version || '-';
+                    document.getElementById('latestVersion').textContent = d.latest_version || '-';
+
+                    if (d.update_available) {
+                        document.getElementById('updateStatus').textContent = 'Update Available';
+                        document.getElementById('updateStatus').style.color = 'var(--warning)';
+                        document.getElementById('updateMessage').textContent = `Version ${d.latest_version} is available.`;
+                        document.getElementById('performUpdateBtn').style.display = 'inline-flex';
+                        if (d.release_notes) {
+                            document.getElementById('releaseNotesContent').textContent = d.release_notes;
+                            document.getElementById('releaseNotes').style.display = 'block';
+                        }
+                    } else {
+                        document.getElementById('updateStatus').textContent = 'Up to Date';
+                        document.getElementById('updateStatus').style.color = 'var(--success)';
+                        document.getElementById('updateMessage').textContent = 'You are running the latest version.';
+                        document.getElementById('performUpdateBtn').style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                document.getElementById('updateMessage').textContent = 'Could not load update status';
+            }
+        }
+
+        async function loadBackups() {
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=backups-list`, {
+                    credentials: 'include'
+                });
+                const d = await r.json();
+
+                const tb = document.getElementById('backupsTableBody');
+                if (!d.success || !d.backups || d.backups.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No backups found</td></tr>';
+                    return;
+                }
+
+                tb.innerHTML = d.backups.map(b => `
+                    <tr>
+                        <td>${esc(b.version)}</td>
+                        <td class="date-cell">${formatDate(b.created_at)}</td>
+                        <td style="font-size: 0.875rem; color: var(--text-muted);">${formatBytes(b.size_bytes)}</td>
+                        <td><span class="status-badge status-active">${b.is_valid ? 'Valid' : 'Invalid'}</span></td>
+                        <td>
+                            <div class="actions-cell">
+                                <button class="btn-icon" data-backup-id="${esc(b.backup_id)}" onclick="restoreBackup('${esc(b.backup_id)}', '${esc(b.version)}')" title="Restore">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                                </button>
+                                <button class="btn-icon" data-backup-id="${esc(b.backup_id)}" onclick="deleteBackup('${esc(b.backup_id)}', '${esc(b.version)}')" title="Delete" style="color: var(--error);">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                document.getElementById('backupsTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--error);">Error loading backups</td></tr>';
+            }
+        }
+
+        async function restoreBackup(backupId, version) {
+            if (!confirm(`Are you sure you want to restore from backup version ${version}? This will replace current data.`)) {
+                return;
+            }
+
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=backup-restore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+                    credentials: 'include',
+                    body: JSON.stringify({ backup_id: backupId })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    alert('Backup restored successfully. Refreshing...');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (d.error || 'Could not restore backup'));
+                }
+            } catch (e) {
+                alert('Error: Could not restore backup');
+            }
+        }
+
+        async function deleteBackup(backupId, version) {
+            if (!confirm(`Are you sure you want to delete the backup from version ${version}?`)) {
+                return;
+            }
+
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=backup-delete`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+                    credentials: 'include',
+                    body: JSON.stringify({ backup_id: backupId })
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    loadBackups();
+                } else {
+                    alert('Error: ' + (d.error || 'Could not delete backup'));
+                }
+            } catch (e) {
+                alert('Error: Could not delete backup');
+            }
+        }
+
+        async function loadUpdateHistory() {
+            try {
+                const r = await fetch(`${API_BASE}/admin-updates.php?action=update-history&limit=10`, {
+                    credentials: 'include'
+                });
+                const d = await r.json();
+
+                const tb = document.getElementById('historyTableBody');
+                if (!d.success || !d.history || d.history.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No update history</td></tr>';
+                    return;
+                }
+
+                tb.innerHTML = d.history.map(h => `
+                    <tr>
+                        <td>${esc(h.new_version)}</td>
+                        <td class="date-cell">${formatDate(h.updated_at)}</td>
+                        <td><span class="status-badge status-${h.status === 'success' ? 'active' : 'inactive'}">${h.status}</span></td>
+                        <td style="font-size: 0.875rem; color: var(--text-muted);">${h.duration_seconds || 0}s</td>
+                        <td style="font-size: 0.875rem; color: var(--text-muted);">${h.error_message ? h.error_message.substring(0, 50) : '-'}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--error);">Error loading history</td></tr>';
+            }
+        }
+
         // Utilities
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
@@ -1279,6 +1658,14 @@
         function formatDate(s) {
             const d = new Date(s);
             return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
         }
     </script>
 </body>

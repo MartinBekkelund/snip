@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SN/P — Maintenance</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+            text-align: left;
+            color: #555;
+            font-size: 0.9375rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1.5rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .timer {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e5e5;
+            color: #999;
+            font-size: 0.8125rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .logo {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🔧</div>
+
+        <h1>Under Maintenance</h1>
+        <p id="message">
+            We're currently performing scheduled system maintenance. We'll be back online shortly.
+        </p>
+
+        <div class="spinner"></div>
+
+        <p style="margin-top: 1.5rem;">
+            <strong>Estimated downtime:</strong> Less than 3 minutes
+        </p>
+
+        <div class="message" id="details" style="display: none;"></div>
+
+        <div class="footer">
+            <p>Thank you for your patience.</p>
+            <p style="margin-top: 0.5rem;">
+                SN/P URL Shortener<br>
+                <span id="timestamp"></span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Display current time
+        function updateTimestamp() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            document.getElementById('timestamp').textContent = 'Last checked: ' + timeStr;
+        }
+
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+
+        // Auto-refresh page every 10 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 10000);
+
+        // Try to load maintenance status
+        fetch('api/admin-updates.php?action=maintenance-status', {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('message').textContent = data.message;
+                }
+                if (data.started_at) {
+                    const started = new Date(data.started_at);
+                    const elapsed = Math.floor((new Date() - started) / 1000);
+                    const remaining = Math.max(0, 180 - elapsed); // 3 minutes
+
+                    if (remaining > 0) {
+                        const mins = Math.floor(remaining / 60);
+                        const secs = remaining % 60;
+                        document.querySelector('.timer').textContent =
+                            `Estimated: ${mins}m ${secs}s remaining`;
+                    }
+                }
+            })
+            .catch(e => {
+                // Maintenance mode status API not available, use defaults
+            });
+    </script>
+</body>
+</html>
