@@ -1,0 +1,59 @@
+%% Snip - URL Shortener
+%% Data Model Diagram
+%% 
+%% @package    Snip
+%% @version    1.0.0
+%% @author     Martin Bekkelund
+%% @copyright  2025 Martin Bekkelund
+%% @license    GPL-3.0-or-later
+%% @link       https://github.com/MartinBekkelund/snip
+
+erDiagram
+    urls {
+        int id PK "AUTO_INCREMENT"
+        varchar short_code UK "Unique, max 100"
+        text original_url "The full URL"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp expires_at "Optional"
+        int click_count "DEFAULT 0"
+        boolean is_active "DEFAULT TRUE"
+        varchar ip_address "Anonymized IP"
+        varchar user_agent "Creator browser"
+    }
+    
+    click_stats {
+        int id PK "AUTO_INCREMENT"
+        int url_id FK "References urls.id"
+        timestamp clicked_at "DEFAULT NOW()"
+        varchar ip_address "Anonymized IP"
+        varchar user_agent "Visitor browser"
+        varchar referer "Traffic source"
+        varchar country_code "2-letter code"
+    }
+    
+    rate_limits {
+        int id PK "AUTO_INCREMENT"
+        varchar rate_key UK "IP or action"
+        int request_count "DEFAULT 1"
+        timestamp expires_at "Required"
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    auth_tokens {
+        int id PK "AUTO_INCREMENT"
+        varchar token UK "SHA256 hash"
+        timestamp expires_at "Required"
+        timestamp created_at "DEFAULT NOW()"
+    }
+    
+    api_keys {
+        int id PK "AUTO_INCREMENT"
+        varchar api_key UK "64 chars"
+        varchar name "Key description"
+        timestamp created_at "DEFAULT NOW()"
+        timestamp last_used_at "Optional"
+        boolean is_active "DEFAULT TRUE"
+        int rate_limit "DEFAULT 100"
+    }
+    
+    urls ||--o{ click_stats : "has many"

@@ -1,0 +1,20 @@
+<!--
+  Snip - URL Shortener
+  Favicon
+  @version 1.0.0
+  @author Martin Bekkelund
+  @copyright 2025 Martin Bekkelund
+  @license GPL-3.0-or-later
+  @link https://github.com/MartinBekkelund/snip
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .favicon-text {
+      font-family: "Gravesend Sans", "Arial Black", "Helvetica Neue", sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      fill: #31394E;
+    }
+  </style>
+  <text class="favicon-text" x="50%" y="75%" text-anchor="middle">/</text>
+</svg>

@@ -1,0 +1,20 @@
+<!--
+  Snip - URL Shortener
+  Logo
+  @version 1.0.0
+  @author Martin Bekkelund
+  @copyright 2025 Martin Bekkelund
+  @license GPL-3.0-or-later
+  @link https://github.com/MartinBekkelund/snip
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60">
+  <style>
+    .logo-text {
+      font-family: "Gravesend Sans", "Arial Black", "Helvetica Neue", sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      fill: #31394E;
+    }
+  </style>
+  <text class="logo-text" x="10" y="45">SN/P</text>
+</svg>

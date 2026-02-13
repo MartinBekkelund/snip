@@ -1,0 +1,1249 @@
+<!--
+  Snip - URL Shortener
+  Admin Panel
+  
+  @package    Snip
+  @version    1.0.0
+  @author     Martin Bekkelund
+  @copyright  2025 Martin Bekkelund
+  @license    GPL-3.0-or-later
+  @link       https://github.com/MartinBekkelund/snip
+  
+  This file is part of Snip.
+  
+  Snip is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SN/P — Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-card: #1f1f23;
+            --bg-elevated: #27272a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #6366f1;
+            --accent-secondary: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --error: #ef4444;
+            --error-bg: rgba(239, 68, 68, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --transition: 0.15s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 15px; -webkit-font-smoothing: antialiased; }
+        
+        body {
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Layout */
+        .app { display: flex; min-height: 100vh; }
+        
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-family: 'Gravesend Sans', 'Arial Black', 'Helvetica Neue', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            color: #fafafa;
+        }
+        
+        .logo-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+        
+        .nav { display: flex; flex-direction: column; gap: 0.25rem; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .nav-item.active { background: var(--accent-primary); color: #fff; }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 { font-size: 1.75rem; font-weight: 600; }
+        .header-actions { display: flex; gap: 0.75rem; }
+
+        /* Shorten Form */
+        .shorten-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .shorten-form { display: flex; gap: 0.75rem; }
+        
+        .input-group { flex: 1; position: relative; }
+        
+        .shorten-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .shorten-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        .shorten-input::placeholder { color: var(--text-muted); }
+        
+        .custom-code-input {
+            width: 150px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Result */
+        .result-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        
+        .result-box.show { display: block; }
+        .result-box.error { border: 1px solid var(--error); }
+        
+        .result-url {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .result-link {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        
+        .result-link:hover { text-decoration: underline; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-family: inherit;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: #fff;
+        }
+        
+        .btn-primary:hover { background: var(--accent-secondary); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        
+        .btn-ghost:hover { background: var(--bg-secondary); color: var(--text-primary); }
+        
+        .btn-danger {
+            background: var(--error-bg);
+            border-color: transparent;
+            color: var(--error);
+        }
+        
+        .btn-danger:hover { background: var(--error); color: #fff; }
+        
+        .btn-sm { padding: 0.375rem 0.625rem; font-size: 0.8125rem; }
+        
+        .btn-icon {
+            padding: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-icon:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+        /* Search */
+        .search-box { position: relative; }
+        
+        .search-box svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        
+        .search-input {
+            padding: 0.625rem 1rem 0.625rem 2.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            width: 280px;
+            transition: var(--transition);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* Table */
+        .table-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .table-title { font-weight: 600; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        
+        th {
+            text-align: left;
+            padding: 0.875rem 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        th:hover { color: var(--text-secondary); }
+        th.sorted { color: var(--accent-secondary); }
+        
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--bg-card); }
+        
+        .code-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--accent-secondary);
+        }
+        
+        .url-cell {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .date-cell { font-size: 0.8125rem; color: var(--text-muted); }
+        .clicks-cell { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+        }
+        
+        .status-active { background: var(--success-bg); color: var(--success); }
+        .status-inactive { background: var(--error-bg); color: var(--error); }
+        
+        .actions-cell { display: flex; gap: 0.375rem; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .pagination-info { font-size: 0.8125rem; color: var(--text-muted); }
+        .pagination-buttons { display: flex; gap: 0.5rem; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.show .modal { transform: scale(1); }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modal-title { font-size: 1.125rem; font-weight: 600; }
+        
+        .modal-close {
+            padding: 0.375rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .modal-close:hover { color: var(--text-primary); }
+        
+        .modal-body { padding: 1.25rem; }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 1rem; }
+        
+        .form-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.375rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            transition: var(--transition);
+        }
+        
+        .form-input:focus { outline: none; border-color: var(--accent-primary); }
+        .form-input.mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .form-switch { display: flex; align-items: center; gap: 0.75rem; }
+        
+        .switch { position: relative; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        
+        .switch-slider {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-elevated);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .switch-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .switch input:checked + .switch-slider { background: var(--accent-primary); }
+        .switch input:checked + .switch-slider::before { transform: translateX(20px); background: #fff; }
+
+        /* Login */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            width: 100%;
+            max-width: 380px;
+        }
+        
+        .login-logo { text-align: center; margin-bottom: 2rem; }
+        
+        .login-logo h1 {
+            font-family: 'Gravesend Sans', 'Arial Black', 'Helvetica Neue', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            color: #fafafa;
+        }
+        
+        .login-logo p { color: var(--text-muted); font-size: 0.875rem; }
+        
+        .login-error {
+            background: var(--error-bg);
+            color: var(--error);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .login-error.show { display: block; }
+
+        /* QR Modal */
+        .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            display: inline-block;
+        }
+        
+        .qr-url {
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--accent-secondary);
+            word-break: break-all;
+            text-align: center;
+        }
+
+        /* Empty & Loading */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-state svg { margin-bottom: 1rem; opacity: 0.5; }
+        
+        .loading { display: flex; align-items: center; justify-content: center; padding: 4rem; }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .url-cell { max-width: 200px; }
+            .shorten-form { flex-direction: column; }
+            .custom-code-input { width: 100%; }
+        }
+        
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 1rem; align-items: stretch; }
+            .search-input { width: 100%; }
+            .table-card { overflow-x: auto; }
+            table { min-width: 600px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login View -->
+    <div id="loginView" class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <h1>SN/P</h1>
+                <p>Admin Panel</p>
+            </div>
+            <div id="loginError" class="login-error"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Enter admin password" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%">Log in</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- App View -->
+    <div id="appView" class="app" style="display: none;">
+        <aside class="sidebar">
+            <div class="logo">SN/P</div>
+            <div class="logo-sub">Admin</div>
+            <nav class="nav">
+                <button class="nav-item active" data-view="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-item" id="logoutBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Log out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main">
+            <!-- Shorten URL Card -->
+            <div class="shorten-card">
+                <form id="shortenForm" class="shorten-form">
+                    <div class="input-group">
+                        <input type="url" id="urlInput" class="shorten-input" placeholder="Paste a long URL to shorten..." required>
+                    </div>
+                    <input type="text" id="customCode" class="shorten-input custom-code-input" placeholder="Custom code (optional)" pattern="[a-zA-Z0-9_-]+">
+                    <button type="submit" class="btn btn-primary" id="shortenBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        Shorten
+                    </button>
+                </form>
+                <div id="resultBox" class="result-box">
+                    <div class="result-url">
+                        <a href="#" id="resultLink" class="result-link" target="_blank"></a>
+                        <button type="button" class="btn-icon" id="qrResultBtn" title="QR Code">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+                        </button>
+                        <button type="button" class="btn-icon" id="copyResultBtn" title="Copy">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total URLs</div>
+                    <div class="stat-value" id="statTotal">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="statActive">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clicks</div>
+                    <div class="stat-value" id="statClicks">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Today</div>
+                    <div class="stat-value" id="statToday">-</div>
+                </div>
+            </div>
+
+            <!-- Header -->
+            <div class="header">
+                <h1>All Links</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search URL or code...">
+                    </div>
+                    <button class="btn btn-ghost" id="refreshBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="short_code">Code</th>
+                            <th data-sort="original_url">Original URL</th>
+                            <th data-sort="click_count">Clicks</th>
+                            <th data-sort="created_at">Created</th>
+                            <th data-sort="is_active">Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">Loading...</div>
+                    <div class="pagination-buttons">
+                        <button class="btn btn-ghost btn-sm" id="prevBtn" disabled>Previous</button>
+                        <button class="btn btn-ghost btn-sm" id="nextBtn" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Edit Link</span>
+                <button class="modal-close" id="closeEditModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form id="editForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
+                    <div class="form-group">
+                        <label class="form-label">Short Code</label>
+                        <input type="text" id="editCode" class="form-input mono" pattern="[a-zA-Z0-9_-]+" minlength="1" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Original URL</label>
+                        <input type="url" id="editUrl" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-switch">
+                            <label class="switch">
+                                <input type="checkbox" id="editActive">
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="form-label" style="margin: 0">Active</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-ghost" id="cancelEdit">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Confirm Delete</span>
+                <button class="modal-close" id="closeDeleteModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this link? This cannot be undone.</p>
+                <p style="margin-top: 0.75rem; color: var(--text-muted);">
+                    <strong id="deleteCode" style="color: var(--accent-secondary)"></strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="cancelDelete">Cancel</button>
+                <button class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div class="modal-overlay" id="qrModal">
+        <div class="modal" style="max-width: 360px;">
+            <div class="modal-header">
+                <span class="modal-title">QR Code</span>
+                <button class="modal-close" id="closeQrModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; align-items: center;">
+                <div class="qr-container" id="qrCodeContainer"></div>
+                <div class="qr-url" id="qrUrl"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-ghost" id="downloadQrPng">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    PNG
+                </button>
+                <button class="btn btn-ghost" id="downloadQrSvg">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    SVG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        const API_BASE = './api';
+        let authToken = localStorage.getItem('adminToken') || '';
+        let currentPage = 1;
+        let currentSort = 'created_at';
+        let currentOrder = 'DESC';
+        let searchQuery = '';
+        let currentUrlId = null;
+        let currentShortUrl = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupEventListeners();
+        });
+
+        async function checkAuth() {
+            try {
+                const r = await fetch(`${API_BASE}/admin.php?action=check`, {
+                    credentials: 'include',
+                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                });
+                const d = await r.json();
+                d.authenticated ? showApp() : showLogin();
+            } catch (e) {
+                showLogin();
+            }
+        }
+
+        function setupEventListeners() {
+            // Login
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // Shorten form
+            document.getElementById('shortenForm').addEventListener('submit', handleShorten);
+            document.getElementById('copyResultBtn').addEventListener('click', () => copyToClipboard(currentShortUrl));
+            document.getElementById('qrResultBtn').addEventListener('click', () => showQrCode(currentShortUrl));
+
+            // Search
+            let searchTimeout;
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchQuery = e.target.value;
+                    currentPage = 1;
+                    loadUrls();
+                }, 300);
+            });
+
+            // Refresh
+            document.getElementById('refreshBtn').addEventListener('click', loadUrls);
+
+            // Pagination
+            document.getElementById('prevBtn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadUrls(); } });
+            document.getElementById('nextBtn').addEventListener('click', () => { currentPage++; loadUrls(); });
+
+            // Sorting
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const s = th.dataset.sort;
+                    if (currentSort === s) {
+                        currentOrder = currentOrder === 'ASC' ? 'DESC' : 'ASC';
+                    } else {
+                        currentSort = s;
+                        currentOrder = 'DESC';
+                    }
+                    loadUrls();
+                    document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sorted'));
+                    th.classList.add('sorted');
+                });
+            });
+
+            // Edit modal
+            document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+            document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+            document.getElementById('editForm').addEventListener('submit', handleEdit);
+
+            // Delete modal
+            document.getElementById('closeDeleteModal').addEventListener('click', closeDeleteModal);
+            document.getElementById('cancelDelete').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirmDelete').addEventListener('click', handleDelete);
+
+            // QR modal
+            document.getElementById('closeQrModal').addEventListener('click', closeQrModal);
+            document.getElementById('downloadQrPng').addEventListener('click', downloadQrPng);
+            document.getElementById('downloadQrSvg').addEventListener('click', downloadQrSvg);
+
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(o => {
+                o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('show'); });
+            });
+        }
+
+        // Auth
+        async function handleLogin(e) {
+            e.preventDefault();
+            const p = document.getElementById('password').value;
+            const err = document.getElementById('loginError');
+            try {
+                const r = await fetch(`${API_BASE}/admin.php?action=auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ password: p })
+                });
+                const d = await r.json();
+                if (d.success) {
+                    authToken = d.token;
+                    localStorage.setItem('adminToken', authToken);
+                    showApp();
+                } else {
+                    err.textContent = d.error || 'Wrong password';
+                    err.classList.add('show');
+                }
+            } catch (error) {
+                err.textContent = 'Could not connect to server';
+                err.classList.add('show');
+            }
+        }
+
+        async function handleLogout() {
+            try { await fetch(`${API_BASE}/admin.php?action=logout`, { credentials: 'include' }); } catch (e) {}
+            authToken = '';
+            localStorage.removeItem('adminToken');
+            showLogin();
+        }
+
+        function showLogin() {
+            document.getElementById('loginView').style.display = 'flex';
+            document.getElementById('appView').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').classList.remove('show');
+        }
+
+        function showApp() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('appView').style.display = 'flex';
+            loadUrls();
+        }
+
+        // Shorten URL
+        async function handleShorten(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('urlInput');
+            const customCode = document.getElementById('customCode');
+            const resultBox = document.getElementById('resultBox');
+            const resultLink = document.getElementById('resultLink');
+
+            try {
+                const body = { url: urlInput.value };
+                if (customCode.value) body.custom_code = customCode.value;
+
+                const r = await fetch(`${API_BASE}/shorten.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const d = await r.json();
+
+                if (d.success) {
+                    currentShortUrl = d.short_url;
+                    resultLink.href = d.short_url;
+                    resultLink.textContent = d.short_url;
+                    resultBox.classList.remove('error');
+                    resultBox.classList.add('show');
+                    urlInput.value = '';
+                    customCode.value = '';
+                    loadUrls();
+                } else {
+                    resultLink.textContent = d.error || 'Error occurred';
+                    resultBox.classList.add('error', 'show');
+                }
+            } catch (error) {
+                resultLink.textContent = 'Could not connect to server';
+                resultBox.classList.add('error', 'show');
+            }
+        }
+
+        // Load URLs
+        async function loadUrls() {
+            const tb = document.getElementById('tableBody');
+            tb.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+
+            try {
+                const params = new URLSearchParams({ page: currentPage, limit: 25, sort: currentSort, order: currentOrder });
+                if (searchQuery) params.append('search', searchQuery);
+
+                const r = await fetch(`${API_BASE}/admin.php?${params}`, {
+                    credentials: 'include',
+                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                });
+
+                if (r.status === 401) { showLogin(); return; }
+
+                const d = await r.json();
+                if (d.success) {
+                    renderTable(d.data);
+                    updatePagination(d.pagination);
+                    updateStats(d.data, d.pagination);
+                }
+            } catch (e) {
+                tb.innerHTML = '<tr><td colspan="6" class="empty-state">Could not load data</td></tr>';
+            }
+        }
+
+        function renderTable(urls) {
+            const tb = document.getElementById('tableBody');
+            if (urls.length === 0) {
+                tb.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    <p>No links found</p>
+                </div></td></tr>`;
+                return;
+            }
+
+            tb.innerHTML = urls.map(u => `
+                <tr>
+                    <td><span class="code-cell">${esc(u.short_code)}</span></td>
+                    <td class="url-cell" title="${esc(u.original_url)}">${esc(u.original_url)}</td>
+                    <td class="clicks-cell">${u.click_count}</td>
+                    <td class="date-cell">${formatDate(u.created_at)}</td>
+                    <td><span class="status-badge ${u.is_active ? 'status-active' : 'status-inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+                    <td>
+                        <div class="actions-cell">
+                            <button class="btn-icon" onclick="showQrCode('${u.short_url}')" title="QR Code">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
+                            </button>
+                            <button class="btn-icon" onclick='openEditModal(${JSON.stringify(u).replace(/'/g, "\\'")})' title="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="btn-icon" onclick='openDeleteModal(${JSON.stringify(u).replace(/'/g, "\\'")})' title="Delete" style="color: var(--error);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updatePagination(p) {
+            const { page, total, pages } = p;
+            const start = (page - 1) * 25 + 1;
+            const end = Math.min(page * 25, total);
+            document.getElementById('paginationInfo').textContent = total > 0 ? `Showing ${start}-${end} of ${total}` : 'No results';
+            document.getElementById('prevBtn').disabled = page <= 1;
+            document.getElementById('nextBtn').disabled = page >= pages;
+        }
+
+        function updateStats(urls, p) {
+            document.getElementById('statTotal').textContent = p.total;
+            document.getElementById('statActive').textContent = urls.filter(u => u.is_active).length;
+            document.getElementById('statClicks').textContent = urls.reduce((s, u) => s + u.click_count, 0);
+            document.getElementById('statToday').textContent = '-';
+        }
+
+        // Edit Modal
+        function openEditModal(u) {
+            document.getElementById('editId').value = u.id;
+            document.getElementById('editCode').value = u.short_code;
+            document.getElementById('editUrl').value = u.original_url;
+            document.getElementById('editActive').checked = u.is_active;
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        async function handleEdit(e) {
+            e.preventDefault();
+            const data = {
+                id: parseInt(document.getElementById('editId').value),
+                short_code: document.getElementById('editCode').value,
+                original_url: document.getElementById('editUrl').value,
+                is_active: document.getElementById('editActive').checked
+            };
+
+            try {
+                const r = await fetch(`${API_BASE}/admin.php`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...(authToken ? { 'X-Admin-Token': authToken } : {}) },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                const res = await r.json();
+                if (res.success) {
+                    closeEditModal();
+                    loadUrls();
+                } else {
+                    alert(res.error || 'Could not save changes');
+                }
+            } catch (e) {
+                alert('Could not save changes');
+            }
+        }
+
+        // Delete Modal
+        function openDeleteModal(u) {
+            currentUrlId = u.id;
+            document.getElementById('deleteCode').textContent = u.short_code;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        async function handleDelete() {
+            try {
+                const r = await fetch(`${API_BASE}/admin.php?id=${currentUrlId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: authToken ? { 'X-Admin-Token': authToken } : {}
+                });
+                const res = await r.json();
+                if (res.success) {
+                    closeDeleteModal();
+                    loadUrls();
+                } else {
+                    alert(res.error || 'Could not delete');
+                }
+            } catch (e) {
+                alert('Could not delete');
+            }
+        }
+
+        // QR Code
+        function showQrCode(url) {
+            const container = document.getElementById('qrCodeContainer');
+            container.innerHTML = '';
+            document.getElementById('qrUrl').textContent = url;
+            new QRCode(container, {
+                text: url,
+                width: 180,
+                height: 180,
+                colorDark: '#1a1a24',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            document.getElementById('qrModal').classList.add('show');
+        }
+
+        function closeQrModal() {
+            document.getElementById('qrModal').classList.remove('show');
+        }
+
+        function downloadQrPng() {
+            const canvas = document.querySelector('#qrCodeContainer canvas');
+            if (canvas) {
+                const link = document.createElement('a');
+                link.download = 'snp-qr.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        function downloadQrSvg() {
+            const canvas = document.querySelector('#qrCodeContainer canvas');
+            if (canvas) {
+                const size = 180;
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const cellSize = canvas.width / 25;
+                let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="white"/>`;
+                for (let y = 0; y < canvas.height; y += Math.floor(cellSize)) {
+                    for (let x = 0; x < canvas.width; x += Math.floor(cellSize)) {
+                        const i = (y * canvas.width + x) * 4;
+                        if (imageData.data[i] < 128) {
+                            svg += `<rect x="${(x / canvas.width) * size}" y="${(y / canvas.height) * size}" width="${(cellSize / canvas.width) * size + 0.5}" height="${(cellSize / canvas.height) * size + 0.5}" fill="#1a1a24"/>`;
+                        }
+                    }
+                }
+                svg += '</svg>';
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                const link = document.createElement('a');
+                link.download = 'snp-qr.svg';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }
+        }
+
+        // Utilities
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Could show a toast notification here
+            });
+        }
+
+        function esc(t) {
+            if (!t) return '';
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        function formatDate(s) {
+            const d = new Date(s);
+            return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+    </script>
+</body>
+</html>

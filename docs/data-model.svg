@@ -1,0 +1,258 @@
+<!--
+  Snip - URL Shortener
+  Data Model Diagram
+  @version 1.0.0
+  @author Martin Bekkelund
+  @copyright 2025 Martin Bekkelund
+  @license GPL-3.0-or-later
+  @link https://github.com/MartinBekkelund/snip
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="headerGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#16a34a"/>
+    </linearGradient>
+    <linearGradient id="headerGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+    <style>
+      .table-card { fill: #1f1f23; }
+      .table-header { fill: url(#headerGrad); }
+      .table-header2 { fill: url(#headerGrad2); }
+      .table-header3 { fill: url(#headerGrad3); }
+      .table-title { font-family: system-ui, sans-serif; font-size: 14px; font-weight: 600; fill: white; }
+      .field-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #e4e4e7; }
+      .field-type { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #71717a; }
+      .field-pk { fill: #fbbf24; }
+      .field-fk { fill: #60a5fa; }
+      .field-uk { fill: #a78bfa; }
+      .divider { stroke: #27272a; stroke-width: 1; }
+      .relation-line { stroke: #6366f1; stroke-width: 2; fill: none; }
+      .relation-text { font-family: system-ui, sans-serif; font-size: 10px; fill: #a1a1aa; }
+      .title { font-family: system-ui, sans-serif; font-size: 20px; font-weight: 700; fill: #fafafa; }
+      .subtitle { font-family: system-ui, sans-serif; font-size: 12px; fill: #71717a; }
+      .legend-text { font-family: system-ui, sans-serif; font-size: 10px; fill: #a1a1aa; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="900" height="520" fill="#0a0a0f"/>
+  
+  <!-- Title -->
+  <text x="450" y="35" text-anchor="middle" class="title">SN/P Data Model</text>
+  <text x="450" y="55" text-anchor="middle" class="subtitle">Entity Relationship Diagram</text>
+  
+  <!-- Legend -->
+  <g transform="translate(30, 480)">
+    <rect x="0" y="0" width="12" height="12" rx="2" fill="#fbbf24"/>
+    <text x="18" y="10" class="legend-text">PK = Primary Key</text>
+    <rect x="130" y="0" width="12" height="12" rx="2" fill="#60a5fa"/>
+    <text x="148" y="10" class="legend-text">FK = Foreign Key</text>
+    <rect x="260" y="0" width="12" height="12" rx="2" fill="#a78bfa"/>
+    <text x="278" y="10" class="legend-text">UK = Unique</text>
+  </g>
+  
+  <!-- URLS TABLE -->
+  <g transform="translate(50, 80)" filter="url(#shadow)">
+    <rect class="table-card" width="250" height="310" rx="12"/>
+    <rect class="table-header" width="250" height="40" rx="12"/>
+    <rect class="table-header" y="28" width="250" height="12"/>
+    <text x="125" y="26" text-anchor="middle" class="table-title">urls</text>
+    
+    <!-- Fields -->
+    <g transform="translate(15, 55)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-pk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">PK</text>
+      <text x="25" y="12" class="field-name">id</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">INT AUTO_INCREMENT</text>
+    </g>
+    <line x1="15" y1="78" x2="235" y2="78" class="divider"/>
+    
+    <g transform="translate(15, 85)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-uk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">UK</text>
+      <text x="25" y="12" class="field-name">short_code</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">VARCHAR(10)</text>
+    </g>
+    <line x1="15" y1="108" x2="235" y2="108" class="divider"/>
+    
+    <g transform="translate(15, 115)">
+      <text x="0" y="12" class="field-name">original_url</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TEXT</text>
+    </g>
+    <line x1="15" y1="138" x2="235" y2="138" class="divider"/>
+    
+    <g transform="translate(15, 145)">
+      <text x="0" y="12" class="field-name">created_at</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TIMESTAMP</text>
+    </g>
+    <line x1="15" y1="168" x2="235" y2="168" class="divider"/>
+    
+    <g transform="translate(15, 175)">
+      <text x="0" y="12" class="field-name">expires_at</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TIMESTAMP NULL</text>
+    </g>
+    <line x1="15" y1="198" x2="235" y2="198" class="divider"/>
+    
+    <g transform="translate(15, 205)">
+      <text x="0" y="12" class="field-name">click_count</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">INT DEFAULT 0</text>
+    </g>
+    <line x1="15" y1="228" x2="235" y2="228" class="divider"/>
+    
+    <g transform="translate(15, 235)">
+      <text x="0" y="12" class="field-name">is_active</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">BOOLEAN DEFAULT 1</text>
+    </g>
+    <line x1="15" y1="258" x2="235" y2="258" class="divider"/>
+    
+    <g transform="translate(15, 265)">
+      <text x="0" y="12" class="field-name">ip_address</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">VARCHAR(45)</text>
+    </g>
+    <line x1="15" y1="288" x2="235" y2="288" class="divider"/>
+    
+    <g transform="translate(15, 295)">
+      <text x="0" y="12" class="field-name">user_agent</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TEXT</text>
+    </g>
+  </g>
+  
+  <!-- CLICK_STATS TABLE -->
+  <g transform="translate(380, 80)" filter="url(#shadow)">
+    <rect class="table-card" width="250" height="250" rx="12"/>
+    <rect class="table-header2" width="250" height="40" rx="12"/>
+    <rect class="table-header2" y="28" width="250" height="12"/>
+    <text x="125" y="26" text-anchor="middle" class="table-title">click_stats</text>
+    
+    <!-- Fields -->
+    <g transform="translate(15, 55)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-pk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">PK</text>
+      <text x="25" y="12" class="field-name">id</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">INT AUTO_INCREMENT</text>
+    </g>
+    <line x1="15" y1="78" x2="235" y2="78" class="divider"/>
+    
+    <g transform="translate(15, 85)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-fk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">FK</text>
+      <text x="25" y="12" class="field-name">url_id</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">INT</text>
+    </g>
+    <line x1="15" y1="108" x2="235" y2="108" class="divider"/>
+    
+    <g transform="translate(15, 115)">
+      <text x="0" y="12" class="field-name">clicked_at</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TIMESTAMP</text>
+    </g>
+    <line x1="15" y1="138" x2="235" y2="138" class="divider"/>
+    
+    <g transform="translate(15, 145)">
+      <text x="0" y="12" class="field-name">ip_address</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">VARCHAR(45)</text>
+    </g>
+    <line x1="15" y1="168" x2="235" y2="168" class="divider"/>
+    
+    <g transform="translate(15, 175)">
+      <text x="0" y="12" class="field-name">user_agent</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TEXT</text>
+    </g>
+    <line x1="15" y1="198" x2="235" y2="198" class="divider"/>
+    
+    <g transform="translate(15, 205)">
+      <text x="0" y="12" class="field-name">referer</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">TEXT</text>
+    </g>
+    <line x1="15" y1="228" x2="235" y2="228" class="divider"/>
+    
+    <g transform="translate(15, 235)">
+      <text x="0" y="12" class="field-name">country_code</text>
+      <text x="220" y="12" text-anchor="end" class="field-type">VARCHAR(2)</text>
+    </g>
+  </g>
+  
+  <!-- API_KEYS TABLE -->
+  <g transform="translate(630, 180)" filter="url(#shadow)">
+    <rect class="table-card" width="230" height="250" rx="12"/>
+    <rect class="table-header3" width="230" height="40" rx="12"/>
+    <rect class="table-header3" y="28" width="230" height="12"/>
+    <text x="115" y="26" text-anchor="middle" class="table-title">api_keys</text>
+    
+    <!-- Fields -->
+    <g transform="translate(15, 55)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-pk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">PK</text>
+      <text x="25" y="12" class="field-name">id</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">INT AUTO_INCREMENT</text>
+    </g>
+    <line x1="15" y1="78" x2="215" y2="78" class="divider"/>
+    
+    <g transform="translate(15, 85)">
+      <rect x="-5" y="0" width="22" height="16" rx="3" class="field-uk"/>
+      <text x="6" y="12" text-anchor="middle" style="font-size:9px;fill:#1a1a24;font-weight:600">UK</text>
+      <text x="25" y="12" class="field-name">api_key</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">VARCHAR(64)</text>
+    </g>
+    <line x1="15" y1="108" x2="215" y2="108" class="divider"/>
+    
+    <g transform="translate(15, 115)">
+      <text x="0" y="12" class="field-name">name</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">VARCHAR(100)</text>
+    </g>
+    <line x1="15" y1="138" x2="215" y2="138" class="divider"/>
+    
+    <g transform="translate(15, 145)">
+      <text x="0" y="12" class="field-name">created_at</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">TIMESTAMP</text>
+    </g>
+    <line x1="15" y1="168" x2="215" y2="168" class="divider"/>
+    
+    <g transform="translate(15, 175)">
+      <text x="0" y="12" class="field-name">last_used_at</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">TIMESTAMP NULL</text>
+    </g>
+    <line x1="15" y1="198" x2="215" y2="198" class="divider"/>
+    
+    <g transform="translate(15, 205)">
+      <text x="0" y="12" class="field-name">is_active</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">BOOLEAN</text>
+    </g>
+    <line x1="15" y1="228" x2="215" y2="228" class="divider"/>
+    
+    <g transform="translate(15, 235)">
+      <text x="0" y="12" class="field-name">rate_limit</text>
+      <text x="200" y="12" text-anchor="end" class="field-type">INT DEFAULT 100</text>
+    </g>
+  </g>
+  
+  <!-- Relationship line: urls -> click_stats -->
+  <g>
+    <path d="M 300 175 L 340 175 L 340 165 L 380 165" class="relation-line" marker-end="url(#arrow)"/>
+    <!-- One side (urls) -->
+    <line x1="300" y1="170" x2="300" y2="180" stroke="#6366f1" stroke-width="2"/>
+    <text x="310" y="160" class="relation-text">1</text>
+    <!-- Many side (click_stats) -->
+    <circle cx="375" cy="165" r="3" fill="#6366f1"/>
+    <line x1="365" y1="160" x2="375" y2="165" stroke="#6366f1" stroke-width="2"/>
+    <line x1="365" y1="170" x2="375" y2="165" stroke="#6366f1" stroke-width="2"/>
+    <text x="355" y="155" class="relation-text">N</text>
+  </g>
+  
+  <!-- Relationship label -->
+  <text x="340" y="145" text-anchor="middle" class="relation-text">has many</text>
+  
+  <!-- Note for api_keys -->
+  <g transform="translate(680, 150)">
+    <text text-anchor="middle" class="subtitle" style="font-style: italic;">(optional - for future use)</text>
+  </g>
+</svg>
