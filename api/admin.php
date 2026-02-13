@@ -10,12 +10,21 @@
  */
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/AuditLog.php';
 
 // Admin-passord (endre dette!)
 define('ADMIN_PASSWORD_HASH', '');
 
 // Session for autentisering - use secure session configuration
 startSecureSession();
+
+// Initialize audit log
+$auditLog = null;
+try {
+    $auditLog = new AuditLog(getDbConnection());
+} catch (Exception $e) {
+    error_log('Audit log initialization failed: ' . $e->getMessage());
+}
 
 // Handle preflight CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -105,6 +114,14 @@ if (strpos($requestUri, '/auth') !== false || (isset($_GET['action']) && $_GET['
             $_SESSION['admin_authenticated'] = true;
             $_SESSION['admin_token_expires'] = time() + (TOKEN_EXPIRY_HOURS * 3600);
 
+            // Log successful login
+            if ($auditLog) {
+                $auditLog->log(
+                    AuditLog::ACTION_LOGIN_SUCCESS,
+                    AuditLog::STATUS_SUCCESS
+                );
+            }
+
             // Generate and return CSRF token
             $csrfToken = getCsrfToken();
 
@@ -114,6 +131,13 @@ if (strpos($requestUri, '/auth') !== false || (isset($_GET['action']) && $_GET['
                 'csrf_token' => $csrfToken
             ]);
         } else {
+            // Log failed login attempt
+            if ($auditLog) {
+                $auditLog->log(
+                    AuditLog::ACTION_LOGIN_FAILED,
+                    AuditLog::STATUS_FAILURE
+                );
+            }
             jsonResponse(['success' => false, 'error' => 'Invalid credentials'], 401);
         }
     }
@@ -123,6 +147,12 @@ if (strpos($requestUri, '/auth') !== false || (isset($_GET['action']) && $_GET['
 // Sjekk utlogging
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     requireCsrfToken();
+
+    // Log logout
+    if ($auditLog) {
+        $auditLog->log(AuditLog::ACTION_LOGOUT, AuditLog::STATUS_SUCCESS);
+    }
+
     $_SESSION['admin_authenticated'] = false;
     session_destroy();
     jsonResponse(['success' => true, 'message' => 'Logget ut']);
@@ -313,7 +343,7 @@ function getUrlDetails(int $id): void {
  * Oppdater URL
  */
 function updateUrl(): void {
-    global $db;
+    global $db, $auditLog;
 
     $input = json_decode(file_get_contents('php://input'), true);
 
@@ -333,6 +363,7 @@ function updateUrl(): void {
     // Bygg oppdaterings-query
     $updates = [];
     $params = [':id' => $id];
+    $changes = [];
 
     if (isset($input['short_code'])) {
         $newCode = preg_replace('/[^a-zA-Z0-9_-]/', '', $input['short_code']);
@@ -349,6 +380,7 @@ function updateUrl(): void {
 
         $updates[] = 'short_code = :short_code';
         $params[':short_code'] = $newCode;
+        $changes['short_code'] = $newCode;
     }
 
     if (isset($input['original_url'])) {
@@ -358,16 +390,19 @@ function updateUrl(): void {
         }
         $updates[] = 'original_url = :original_url';
         $params[':original_url'] = $url;
+        $changes['original_url'] = $url;
     }
 
     if (isset($input['is_active'])) {
         $updates[] = 'is_active = :is_active';
         $params[':is_active'] = $input['is_active'] ? 1 : 0;
+        $changes['is_active'] = (bool)$input['is_active'];
     }
 
     if (isset($input['expires_at'])) {
         $updates[] = 'expires_at = :expires_at';
         $params[':expires_at'] = $input['expires_at'] ?: null;
+        $changes['expires_at'] = $input['expires_at'];
     }
 
     if (empty($updates)) {
@@ -378,6 +413,16 @@ function updateUrl(): void {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
+    // Log update
+    if ($auditLog) {
+        $auditLog->log(
+            AuditLog::ACTION_URL_UPDATE,
+            AuditLog::STATUS_SUCCESS,
+            $id,
+            json_encode($changes)
+        );
+    }
+
     jsonResponse(['success' => true, 'message' => 'URL oppdatert']);
 }
 
@@ -385,18 +430,29 @@ function updateUrl(): void {
  * Slett URL
  */
 function deleteUrl(int $id): void {
-    global $db;
+    global $db, $auditLog;
 
     // Sjekk at URL eksisterer
-    $stmt = $db->prepare('SELECT id FROM urls WHERE id = :id');
+    $stmt = $db->prepare('SELECT id, short_code FROM urls WHERE id = :id');
     $stmt->execute([':id' => $id]);
-    if (!$stmt->fetch()) {
+    $url = $stmt->fetch();
+    if (!$url) {
         errorResponse('URL ikke funnet', 404);
     }
 
     // Slett (cascade sletter også click_stats)
     $stmt = $db->prepare('DELETE FROM urls WHERE id = :id');
     $stmt->execute([':id' => $id]);
+
+    // Log deletion
+    if ($auditLog) {
+        $auditLog->log(
+            AuditLog::ACTION_URL_DELETE,
+            AuditLog::STATUS_SUCCESS,
+            $id,
+            json_encode(['short_code' => $url['short_code']])
+        );
+    }
 
     jsonResponse(['success' => true, 'message' => 'URL slettet']);
 }

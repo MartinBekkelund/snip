@@ -841,7 +841,8 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- QR Code library - local copy to avoid CDN dependency -->
+    <script src="./js/qrcode.min.js"></script>
     <script>
         const API_BASE = './api';
         let csrfToken = '';
@@ -883,6 +884,32 @@
             document.getElementById('shortenForm').addEventListener('submit', handleShorten);
             document.getElementById('copyResultBtn').addEventListener('click', () => copyToClipboard(currentShortUrl));
             document.getElementById('qrResultBtn').addEventListener('click', () => showQrCode(currentShortUrl));
+
+            // Table action buttons (event delegation - QR, Edit, Delete)
+            document.getElementById('tableBody').addEventListener('click', (e) => {
+                const qrBtn = e.target.closest('.qr-btn');
+                const editBtn = e.target.closest('.edit-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+
+                if (qrBtn) {
+                    const url = qrBtn.dataset.url;
+                    showQrCode(url);
+                }
+
+                if (editBtn) {
+                    const id = parseInt(editBtn.dataset.id);
+                    const code = editBtn.dataset.code;
+                    const url = editBtn.dataset.url;
+                    const active = editBtn.dataset.active === 'true' || editBtn.dataset.active === '1';
+                    openEditModal({ id: id, short_code: code, original_url: url, is_active: active });
+                }
+
+                if (deleteBtn) {
+                    const id = parseInt(deleteBtn.dataset.id);
+                    const code = deleteBtn.dataset.code;
+                    openDeleteModal({ id: id, short_code: code });
+                }
+            });
 
             // Search
             let searchTimeout;
@@ -1078,13 +1105,13 @@
                     <td><span class="status-badge ${u.is_active ? 'status-active' : 'status-inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
                     <td>
                         <div class="actions-cell">
-                            <button class="btn-icon" onclick="showQrCode('${u.short_url}')" title="QR Code">
+                            <button class="btn-icon qr-btn" data-url="${esc(u.short_url)}" title="QR Code">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
                             </button>
-                            <button class="btn-icon" onclick='openEditModal(${JSON.stringify(u).replace(/'/g, "\\'")})' title="Edit">
+                            <button class="btn-icon edit-btn" data-id="${u.id}" data-code="${esc(u.short_code)}" data-url="${esc(u.original_url)}" data-active="${u.is_active}" title="Edit">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
-                            <button class="btn-icon" onclick='openDeleteModal(${JSON.stringify(u).replace(/'/g, "\\'")})' title="Delete" style="color: var(--error);">
+                            <button class="btn-icon delete-btn" data-id="${u.id}" data-code="${esc(u.short_code)}" title="Delete" style="color: var(--error);">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
                         </div>

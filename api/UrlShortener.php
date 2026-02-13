@@ -218,16 +218,27 @@ class UrlShortener {
      * @param int $urlId The URL ID
      */
     private function logClick(int $urlId): void {
+        // Validate and sanitize referer
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+        if (!empty($referer)) {
+            // Validate referer is a valid URL
+            $referer = filter_var($referer, FILTER_VALIDATE_URL);
+            // Truncate to reasonable length
+            if ($referer) {
+                $referer = substr($referer, 0, 500);
+            }
+        }
+
         $stmt = $this->db->prepare('
             INSERT INTO click_stats (url_id, ip_address, user_agent, referer)
             VALUES (:url_id, :ip_address, :user_agent, :referer)
         ');
-        
+
         $stmt->execute([
             ':url_id' => $urlId,
             ':ip_address' => getClientIp(), // Anonymized IP
             ':user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
-            ':referer' => substr($_SERVER['HTTP_REFERER'] ?? '', 0, 500)
+            ':referer' => $referer ?: null  // Store null if invalid
         ]);
     }
     
